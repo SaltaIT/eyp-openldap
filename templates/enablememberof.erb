@@ -1,0 +1,65 @@
+#!/bin/bash
+
+PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
+
+if [ "$(slapcat -n 0 | grep ^dn | grep memberof -c)" -ne 1 ];
+then
+
+date
+
+#memberof
+
+cat <<EOF | ldapadd -Y EXTERNAL -H ldapi:///
+dn: cn=module,cn=config
+cn: module
+objectclass: olcModuleList
+olcmoduleload: memberof
+olcmodulepath: /usr/lib64/openldap
+
+dn: olcOverlay={0}memberof,olcDatabase={<%= @backendindex %>}<%= scope.lookupvar('openldap::server::backend') %>,cn=config
+objectClass: olcConfig
+objectClass: olcMemberOf
+objectClass: olcOverlayConfig
+objectClass: top
+olcOverlay: memberof
+olcMemberOfDangling: ignore
+olcMemberOfRefInt: TRUE
+olcMemberOfGroupOC: groupOfNames
+olcMemberOfMemberAD: member
+olcMemberOfMemberOfAD: memberOf
+EOF
+
+#refint
+
+cat <<EOF | ldapmodify -Y EXTERNAL -H ldapi:///
+dn: cn=module{1},cn=config
+add: olcmoduleload
+olcmoduleload: refint
+EOF
+
+cat <<EOF | ldapadd -Y EXTERNAL -H ldapi:///
+dn: olcOverlay={1}refint,olcDatabase={<%= @backendindex %>}<%= scope.lookupvar('openldap::server::backend') %>,cn=config
+objectClass: olcConfig
+objectClass: olcOverlayConfig
+objectClass: olcRefintConfig
+objectClass: top
+olcOverlay: {1}refint
+olcRefintAttribute: memberof member manager owner
+EOF
+
+#test memberof:
+#ldapsearch -x -LLL -H ldap:/// -b uid=jordi,o=AOP,ou=system dn memberof
+
+
+#[root@lclient sssd]# ssh jordi@localhost
+#jordi@localhost's password:
+#id: cannot find name for group ID 1000
+#[jordi@lclient ~]$ logout
+#Connection to localhost closed.
+#[root@lclient sssd]# ssh testldap@localhost
+#testldap@localhost's password:
+#Connection closed by ::1
+#[root@lclient sssd]#
+
+
+fi

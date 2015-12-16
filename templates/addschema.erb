@@ -1,0 +1,10 @@
+#!/bin/bash
+
+exec >> <%= scope.lookupvar('openldap::server::slapdtmpbase') %>/.addschema.<%= @schemaname %>.log 2>&1
+
+ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=schema,cn=config cn | grep <%= @schemaname %> > /dev/null 2>&1
+
+if [ "$?" -ne 0 ];
+then
+	cat <%= scope.lookupvar('openldap::server::slapdtmpbase') %>/schema.<%= @schemaname %>.ldif | ldapadd  -Y EXTERNAL -H ldapi:///
+fi

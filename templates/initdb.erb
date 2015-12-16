@@ -1,0 +1,100 @@
+#!/bin/bash
+
+PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
+
+date
+
+<% if(@backend == "bdb") %>
+
+cat <<EOF | ldapmodify -Y EXTERNAL -H ldapi:///
+dn:  olcDatabase={2}bdb,cn=config
+changetype: modify
+replace: olcSuffix
+olcSuffix: <%= scope.lookupvar('openldap::server::base') %>
+-
+replace: olcRootDN
+olcRootDN: cn=<%= scope.lookupvar('openldap::server::admin') %>,<%= scope.lookupvar('openldap::server::base') %>
+-
+add: olcRootPW
+olcRootPW: $(cat <%= scope.lookupvar('openldap::server::slapdtmpbase') %>/.sshapass)
+EOF
+
+<% elsif(@backend == 'mdb') %>
+
+# TODO: arreglar. el rm del slapd.d es lleig, pero no he trobat com fer el delete net a base de slapadd -ls
+
+/etc/init.d/slapd stop
+
+rm -rf /etc/openldap/slapd.d/cn\=config/olcDatabase={2}*
+
+rm -f /var/lib/ldap/*
+
+/etc/init.d/slapd start
+
+cat <<EOF | ldapadd -Y EXTERNAL -H ldapi:///
+dn: olcDatabase={2}mdb,cn=config
+objectClass: olcDatabaseConfig
+objectClass: olcMdbConfig
+olcDatabase: mdb
+olcSuffix: <%= scope.lookupvar('openldap::server::base') %>
+olcDbDirectory: /var/lib/ldap
+olcRootDN: cn=<%= scope.lookupvar('openldap::server::admin') %>,<%= scope.lookupvar('openldap::server::base') %>
+olcRootPW: $(cat <%= scope.lookupvar('openldap::server::slapdtmpbase') %>/.sshapass)
+olcDbIndex: objectClass eq
+olcLastMod: TRUE
+olcMonitoring: TRUE
+olcDbEnvFlags: writemap
+olcDBNoSync: TRUE
+olcAccess: to attrs=userPassword by dn="cn=<%= scope.lookupvar('openldap::server::admin') %>,<%= scope.lookupvar('openldap::server::base') %>" write by anonymous auth by self write by * none
+olcAccess: to attrs=shadowLastChange by self write by * read
+olcAccess: to dn.base="" by * read
+olcAccess: to * by dn="cn=<%= scope.lookupvar('openldap::server::admin') %>,<%= scope.lookupvar('openldap::server::base') %>" write by * read
+<% if defined?(@mdbsize) -%>
+olcDbMaxSize: <%= scope.lookupvar('openldap::server::mdbsize') %>
+<% else -%>
+olcDbMaxSize: 9126805504
+<% end -%>
+EOF
+
+<% else %>
+
+echo <%= @backend %> not supported
+exit 1
+
+<% end %>
+
+
+<% if @custominitdb %>
+
+ldapadd -x -D "cn=<%= scope.lookupvar('openldap::server::admin') %>,<%= scope.lookupvar('openldap::server::base') %>" -w $(cat <%= scope.lookupvar('openldap::server::slapdtmpbase') %>/.cleartextpass) -f <%= scope.lookupvar('openldap::server::slapdtmpbase') %>/custominitdb
+
+<% else %>
+cat <<EOF | ldapmodify -x -D "cn=<%= scope.lookupvar('openldap::server::admin') %>,<%= scope.lookupvar('openldap::server::base') %>" -w $(cat <%= scope.lookupvar('openldap::server::slapdtmpbase') %>/.cleartextpass)
+dn: <%= scope.lookupvar('openldap::server::base') %>
+changetype: add
+objectclass: dcObject
+objectclass: organization
+o: <%= scope.lookupvar('openldap::server::oname') %>
+dc: $(echo "<%= scope.lookupvar('openldap::server::base') %>" | cut -f1 -d, | cut -f2 -d=)
+
+dn: cn=<%= scope.lookupvar('openldap::server::admin') %>,<%= scope.lookupvar('openldap::server::base') %>
+changetype: add
+objectclass: organizationalRole
+cn: <%= scope.lookupvar('openldap::server::admin') %>
+EOF
+<% end %>
+
+
+
+cat <<EOF | ldapmodify -Y EXTERNAL -H ldapi:///
+dn: cn=config
+changetype: modify
+replace: olcLogLevel
+olcLogLevel: <%= @debuglevel %>
+EOF
+
+
+ldapsearch -x -b '<%= scope.lookupvar('openldap::server::base') %>' '(objectclass=*)'
+
+
+exit 0

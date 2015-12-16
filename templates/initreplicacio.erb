@@ -1,0 +1,18 @@
+#!/bin/bash
+
+PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
+
+date
+
+<% if @isMaster || defined?(@masterinfo) %>
+
+cat <<EOF | ldapmodify -Y EXTERNAL -H ldapi:///
+dn: cn=module,cn=config
+changetype: add
+objectClass: olcModuleList
+cn: module
+olcModulePath: /usr/lib64/openldap
+olcModuleLoad: syncprov.la
+EOF
+
+<% end %>

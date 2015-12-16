@@ -1,0 +1,35 @@
+#!/bin/bash
+
+exec >> <%= scope.lookupvar('openldap::server::slapdtmpbase') %>/.addindexes.log 2>&1
+
+<% if defined?(@indexes) %>
+
+date
+
+echo indexes
+
+#ldapsearch -Y EXTERNAL -H ldapi:/// -b olcDatabase={2}<%= scope.lookupvar('openldap::server::backend') %>,cn=config olcDbIndex 2>/dev/null| grep olcDbIndex | grep -v "^#"
+
+CURRENTINDEXCONFIG=$(ldapsearch -Y EXTERNAL -H ldapi:/// -b olcDatabase={2}<%= scope.lookupvar('openldap::server::backend') %>,cn=config olcDbIndex 2>/dev/null| grep olcDbIndex | grep -v "^#" | md5sum | awk '{ print $1 }')
+
+CONFIGUREDINDEXCONFIG=$(cat <<EOF | md5sum | awk '{ print $1 }'
+<% @indexes.each do |val| -%>olcDbIndex: <%= val %>
+<% end -%>
+EOF
+)
+
+if [[ "$CURRENTINDEXCONFIG" != "$CONFIGUREDINDEXCONFIG" ]];
+then
+	echo UPDATING INDEX CONFIG
+
+cat <<EOF | ldapmodify -Y EXTERNAL -H ldapi:///
+dn: olcDatabase={2}<%= scope.lookupvar('openldap::server::backend') %>,cn=config
+changetype: modify
+replace: olcDbIndex
+<% @indexes.each do |val| -%>olcDbIndex: <%= val %>
+<% end -%>
+EOF
+
+fi
+
+<% end %>

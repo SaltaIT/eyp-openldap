@@ -1,0 +1,14 @@
+{
+  "name": "eyp-openldap",
+  "version": "0.4.11",
+  "author": "eyp",
+  "summary": "manages OpenLDAP using OLC",
+  "license": "Apache-2.0",
+  "source": "",
+  "issues_url": null,
+  "project_page": "http://systemadmin.es",
+  "dependencies": [
+    {"version_requirement":">= 1.0.0","name":"puppetlabs/stdlib"},
+    {"version_requirement":">= 0.1.0","name":"eyp/epel"}
+  ]
+}

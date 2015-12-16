@@ -1,0 +1,17 @@
+#!/bin/bash
+
+PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
+
+date
+
+<% if @isMaster %>
+cat <<EOF | ldapmodify -Y EXTERNAL -H ldapi:///
+dn: olcOverlay=syncprov, olcDatabase={2}<%= @backend %>,cn=config
+changetype: add
+objectclass: olcSyncProvConfig
+olcOverlay: syncprov
+olcSpCheckpoint: 100 10
+EOF
+<% else %>
+echo 'not a master'
+<% end %>

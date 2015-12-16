@@ -1,0 +1,101 @@
+#!/bin/bash
+
+PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
+
+date
+
+<% if defined?(@masterinfo) %>
+
+echo 'regular slave'
+
+#TODO: més de dos multimasters
+
+<% @masterinfo.each do |key| -%>
+
+cat <<EOF | ldapmodify -Y EXTERNAL -H ldapi:///
+dn: olcDatabase={2}<%= @backend %>,cn=config
+changetype: modify
+add:olcSyncrepl
+olcSyncrepl: {0}rid=000
+  provider=ldap://<%= key %>
+  type=refreshAndPersist
+  retry="5 5 300 +"
+  searchbase="<%= scope.lookupvar('openldap::server::base') %>"
+  attrs="*,+"
+  bindmethod=simple
+  binddn="cn=<%= scope.lookupvar('openldap::server::admin') %>,<%= scope.lookupvar('openldap::server::base') %>"
+  credentials=$(cat <%= scope.lookupvar('openldap::server::slapdtmpbase') %>/.cleartextpass)
+EOF
+
+
+<% end %>
+
+<% if defined?(@updateref) %>
+
+
+<% if defined?(@chainingoverlay) %>
+#sanity check
+echo "chainingoverlay incompatible with updateref"
+exit 256
+
+<% end %>
+
+
+#olcUpdateRef: ldap://ldap.example.com
+
+cat <<EOF | ldapmodify -Y EXTERNAL -H ldapi:///
+dn: olcDatabase={2}<%= @backend %>,cn=config
+changetype: modify
+add: olcUpdateRef
+olcUpdateRef: <%= @updateref %>
+EOF
+
+
+<% end %>
+
+<% if defined?(@chainingoverlay) %>
+
+echo A
+
+cat <<EOF | ldapmodify -Y EXTERNAL -H ldapi:///
+dn: olcDatabase={2}<%= @backend %>,cn=config
+changetype: modify
+add: olcUpdateRef
+olcUpdateRef: <%= @chainingoverlay %>
+EOF
+
+echo B
+
+#chaining overlay
+cat <<EOF | ldapmodify -Y EXTERNAL -H ldapi:///
+dn: olcOverlay=chain,olcDatabase={-1}frontend,cn=config
+changetype: add
+objectClass: olcOverlayConfig
+objectClass: olcChainConfig
+olcOverlay: {0}chain
+olcChainReturnError: TRUE
+EOF
+
+echo C
+
+cat <<EOF | ldapmodify -Y EXTERNAL -H ldapi:///
+dn: olcDatabase={2}<%= @backend %>,olcOverlay={0}chain,olcDatabase={-1}frontend,cn=config
+changetype: add
+objectClass: olcLDAPConfig
+objectClass: olcChainDatabase
+olcDatabase: {2}<%= @backend %>
+olcDbURI: "<%= @chainingoverlay %>"
+olcDbRebindAsUser: TRUE
+olcDbIDAssertBind: bindmethod=simple binddn="cn=<%= scope.lookupvar('openldap::server::admin') %>,<%= scope.lookupvar('openldap::server::base') %>" credentials="$(cat <%= scope.lookupvar('openldap::server::slapdtmpbase') %>/.cleartextpass)" mode=self
+EOF
+
+exit 0
+
+<% end %>
+
+<% else %>
+
+echo 'not a slave'
+exit 0
+
+<% end %>

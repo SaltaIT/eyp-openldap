@@ -1,0 +1,19 @@
+#!/bin/bash
+
+exec >> <%= scope.lookupvar('openldap::server::slapdtmpbase') %>/.mdbsize.log 2>&1
+
+<% if defined?(@mdbsize) %>
+
+CURRENTMDBSIZE=$(ldapsearch -Y EXTERNAL -H ldapi:/// -b olcDatabase={2}<%= scope.lookupvar('openldap::server::backend') %>,cn=config olcDbMaxSize 2>/dev/null | grep ^olcDbMaxSize | awk '{ print $NF }')
+
+if [ "$CURRENTMDBSIZE" -ne <%= @mdbsize %> ];
+then
+	cat <<EOF | ldapmodify -Y EXTERNAL -H ldapi:///
+dn: olcDatabase={2}<%= scope.lookupvar('openldap::server::backend') %>,cn=config
+changetype: modify
+replace: olcDbMaxSize
+olcDbMaxSize: <%= @mdbsize %>
+EOF
+fi
+
+<% end %>

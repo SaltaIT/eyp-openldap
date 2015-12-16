@@ -1,0 +1,62 @@
+#!/bin/bash
+
+PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
+
+date
+
+<% if defined?(@mm) %>
+
+echo 'multimaster mirrormode'
+
+cat <<EOF | ldapmodify -Y EXTERNAL -H ldapi:///
+dn: cn=config
+changetype: modify
+add: olcServerID
+olcServerID: <%= scope.lookupvar('openldap::server::serverid') %>
+EOF
+
+
+cat <<EOF | ldapmodify -Y EXTERNAL -H ldapi:///
+dn: olcDatabase={2}<%= @backend %>,cn=config
+changetype: modify
+add: olcSyncrepl
+<% @mm.each do |key| -%>
+olcsyncrepl: {0}rid=000
+  provider=ldap://<%= key %>
+  type=refreshAndPersist
+  retry="5 5 300 +"
+  searchbase="<%= scope.lookupvar('openldap::server::base') %>"
+  attrs="*,+"
+  bindmethod=simple
+  binddn="cn=<%= scope.lookupvar('openldap::server::admin') %>,<%= scope.lookupvar('openldap::server::base') %>"
+  credentials=$(cat <%= scope.lookupvar('openldap::server::slapdtmpbase') %>/.cleartextpass)
+<% end -%>
+-
+add: olcDbIndex
+olcDbIndex: entryUUID eq
+olcDbIndex: entryCSN eq
+-
+replace: olcMirrorMode
+olcMirrorMode: TRUE
+EOF
+
+<% else %>
+
+echo 'not a mm'
+
+<% end %>
+
+echo "aixo mho he saltat"
+
+echo "
+add: olcAccess
+olcAccess: {x}to *
+  by dn.base="cn=<%= scope.lookupvar('openldap::server::admin') %>,<%= scope.lookupvar('openldap::server::base') %>" read
+  by * break
+-
+add: olcDbIndex
+"
+
+#cat <%= scope.lookupvar('openldap::server::slapdtmpbase') %>/.cleartextpass
+
+rm -f <%= scope.lookupvar('openldap::server::slapdtmpbase') %>/.cleartextpass

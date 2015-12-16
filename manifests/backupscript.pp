@@ -1,0 +1,90 @@
+define openldap::backupscript(
+				$destination, 
+				$retention=undef, 
+				$logdir=undef, 
+				$mailto=undef,
+				$idhost=undef,
+				$backupscript="/usr/local/bin/backupopenldap", 
+				$backupscriptconf=undef,
+				$hour=2,
+				$minute=0,
+			) {
+
+	validate_string($destination)
+	
+	#if ($openldap::mdb == "mdb")
+	#{
+	#	warn("http://www.openldap.org/faq/data/cache/287.html")
+	#}
+
+	if defined(Class['netbackupclient'])
+	{
+		netbackupclient::includedir{ $destination: }
+	}
+
+	exec { "mkdir_p_$destination": 
+		command => "/bin/mkdir -p $destinarion",
+		refreshonly => true,
+	}
+
+	file { $destination:
+		ensure => 'directory',
+		owner => "root",
+		group => 'root',
+		mode => 700,
+		require => Exec["mkdir_p_$destination"]
+	}
+	
+	if ! defined(Class['epel'])
+	{
+		@class { 'epel':
+			require => File["$destination"],
+		}
+	}
+	
+	realize Class['epel']
+	
+	package { 'lmdb':
+		ensure => 'installed',
+		require => Class["epel"],
+	}
+
+	file { $backupscript:
+		ensure => present,
+		owner => "root",
+		group => "root",
+		mode => 0700,
+		require => Package['lmdb'],
+		content => template("openldap/openldap_backup.erb")
+	}
+
+	cron { 'backupopenldap':
+		command => "$backupscript",
+		user    => root,
+		hour    => $hour,
+		minute  => $minute,
+	}
+	
+	if($backupscriptconf)
+	{
+		file { '$backupscriptconf':
+			ensure => present,
+			owner => "root",
+			group => "root",
+			mode => 0700,
+			require => Package['lmdb'],
+			content => template("openldap/openldap_backup_conf.erb")
+		}
+	}
+	else
+	{
+		file { '/usr/local/bin/backupopenldap.config':
+			ensure => present,
+			owner => "root",
+			group => "root",
+			mode => 0700,
+			require => Package['lmdb'],
+			content => template("openldap/openldap_backup_conf.erb")
+		}
+	}
+}
