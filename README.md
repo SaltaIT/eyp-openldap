@@ -111,19 +111,18 @@ node 'ldapmm2'
 
 To setup LDAP with mdb backend and TLS enabled:
 ```puppet
-        class { 'openldap':
-                base => 'o=AOP,ou=system',
-                admin => 'Manager',
-                adminpassword => 'cacadevaca',
-                oname => 'admin',
-                isMaster => true,
-		backend => 'mdb',
-		mdbsize => 12345678,
-		tlsca => 'puppet:///openldap/masterauth/ccc-ca.crt',
-		tlscert => 'puppet:///openldap/masterauth/ldap-master-01.crt',
-		tlspk => 'puppet:///openldap/masterauth/ldap-master-01.key.pem',
-		
-        }
+class { 'openldap':
+  base => 'o=AOP,ou=system',
+  admin => 'Manager',
+  adminpassword => 'cacadevaca',
+  oname => 'admin',
+  isMaster => true,
+  backend => 'mdb',
+  mdbsize => 12345678,
+  tlsca => 'puppet:///openldap/masterauth/ccc-ca.crt',
+  tlscert => 'puppet:///openldap/masterauth/ldap-master-01.crt',
+  tlspk => 'puppet:///openldap/masterauth/ldap-master-01.key.pem',
+}
 ```
 
 ## Usage
@@ -151,12 +150,12 @@ Configure a backup script
 		hour => 2,
 		minute => 0,
 	}
-``` 
+```
 
 Add indexes:
 
 ```puppet
-	class { 'openldap::indexes': 
+	class { 'openldap::indexes':
 		indexes => [
 			'objectClass eq,pres',
 			'ou,cn,mail,surname,givenname eq,pres,sub',
@@ -170,7 +169,7 @@ Add indexes:
 			'memberUid eq',
 			],
 	}
-``` 
+```
 
 ## Reference
 
