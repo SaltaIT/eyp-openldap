@@ -31,10 +31,6 @@ class openldap::server(
 
 	if ($masterinfo) { validate_array($masterinfo) }
 
-	if defined(Class['ntteam'])
-	{
-		ntteam::tag{ 'openldap': }
-	}
 
   #WTF? marranda per validar al params, shauria de refer
 	if(!defined(Class['openldap::params']))
