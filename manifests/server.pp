@@ -140,8 +140,8 @@ class openldap::server(
 
 
   service { 'slapd':
-    enable  => true,
     ensure  => 'running',
+    enable  => true,
     require => File['/etc/sysconfig/ldap'],
   }
 
