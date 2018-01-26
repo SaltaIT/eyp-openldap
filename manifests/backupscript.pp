@@ -23,7 +23,7 @@ define openldap::backupscript(
   }
 
   exec { "mkdir_p_${destination}":
-    command     => "/bin/mkdir -p ${destinarion}",
+    command     => "/bin/mkdir -p ${destination}",
     refreshonly => true,
   }
 

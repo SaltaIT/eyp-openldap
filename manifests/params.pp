@@ -24,7 +24,7 @@ class openldap::params {
     fail("updateref (${openldap::updateref}) and chainingoverlay (${openldap::chainingoverlay}) are incompatible")
   }
 
-  if($openldap::backend != "mdb") and ($openldap::mdbsize)
+  if($openldap::backend != 'mdb') and ($openldap::mdbsize)
   {
     fail("mdbsize incompatible with backend ${openldap::backend}")
   }

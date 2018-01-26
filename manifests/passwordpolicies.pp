@@ -11,10 +11,10 @@ class openldap::passwordpolicies(
   }
 
   file { "${openldap::slapdtmpbase}/enablepasswordpolicies":
-    ensure  => present,
-    owner   => "root",
-    group   => "root",
-    mode    => 0640,
+    ensure  => 'present',
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0640',
     require => Exec['cleartextpassword-passwordpolicies'],
     content => template("${module_name}/enablepasswordpolicies.erb"),
     #notify => Exec["bash enablepasswordpolicies"],
