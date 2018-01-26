@@ -12,6 +12,7 @@ class openldap::params {
 			case $::operatingsystemrelease
 			{
 				/^6.*$/: { }
+				/^7.*$/: { }
 				default: { fail("Unsupported RHEL/CentOS version!")  }
 			}
 		}
