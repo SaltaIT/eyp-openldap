@@ -72,7 +72,7 @@ class openldap::server(
     #validate_integer($serverid)
   }
 
-  if ($backend == "bdb")
+  if ($backend == 'bdb')
   {
     file { '/var/lib/ldap/DB_CONFIG':
       ensure  => 'present',
@@ -92,7 +92,7 @@ class openldap::server(
       require => Exec['bash initdb'],
     }
 
-    file { "/etc/pki/tls/private/openldap-slapd.pk":
+    file { '/etc/pki/tls/private/openldap-slapd.pk':
       ensure  => 'present',
       owner   => 'ldap',
       group   => 'root',
@@ -166,9 +166,9 @@ class openldap::server(
     }
 
     exec { 'init_schema':
-      command => "/usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f $slapdtmpbase/init.schema >> $slapdtmpbase/.init_schema.log 2>&1",
-      require => [File["$slapdtmpbase/init.schema"], Package[$openldap::params::ldapclient_pkg]],
-      creates => "$slapdtmpbase/.init_schema.log"
+      command => "/usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f ${slapdtmpbase}/init.schema >> ${slapdtmpbase}/.init_schema.log 2>&1",
+      require => [File["${slapdtmpbase}/init.schema"], Package[$openldap::params::ldapclient_pkg]],
+      creates => "${slapdtmpbase}/.init_schema.log"
     }
 
     if($custominitdb)
@@ -204,7 +204,7 @@ class openldap::server(
   exec { 'cleartextpassword':
     command => "/bin/echo ${adminpassword} > ${slapdtmpbase}/.cleartextpass",
     creates => "${slapdtmpbase}/.cleartextpass",
-    require => Exec["sshapassword"],
+    require => Exec['sshapassword'],
   }
 
   exec { 'bash initdb':
