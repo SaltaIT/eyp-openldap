@@ -230,7 +230,7 @@ class openldap::server(
   }
 
 
-  file { "$slapdtmpbase/initmaster":
+  file { "${slapdtmpbase}/initmaster":
     ensure  => 'present',
     owner   => 'root',
     group   => 'root',
