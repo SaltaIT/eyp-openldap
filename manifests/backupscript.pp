@@ -35,15 +35,6 @@ define openldap::backupscript(
     require => Exec["mkdir_p_${destination}"]
   }
 
-  if ! defined(Class['epel'])
-  {
-    @class { 'epel':
-      require => File[$destination],
-    }
-  }
-
-  realize Class['epel']
-
   package { 'lmdb':
     ensure  => 'installed',
     require => Class['epel'],
