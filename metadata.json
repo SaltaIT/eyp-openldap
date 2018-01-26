@@ -4,17 +4,35 @@
   "author": "eyp",
   "summary": "manages OpenLDAP using OLC",
   "license": "Apache-2.0",
-  "source": "",
-  "issues_url": null,
-  "project_page": "http://systemadmin.es",
+  "source": "https://github.com/NTTCom-MS/eyp-openldap",
+  "project_page": "https://github.com/NTTCom-MS/eyp-openldap",
+  "issues_url": "https://github.com/NTTCom-MS/eyp-openldap/issues",
   "dependencies": [
-    {"version_requirement":">= 1.0.0","name":"puppetlabs/stdlib"},
-    {"version_requirement":">= 0.1.0","name":"eyp/epel"}
+    {"name":"puppetlabs/stdlib", "version_requirement":">= 1.0.0 < 9.9.9"},
+    {"name":"eyp/epel", "version_requirement":">= 0.1.0 < 9.9.9"}
   ],
   "operatingsystem_support": [
     {
       "operatingsystem": "RedHat",
       "operatingsystemrelease": [ "6" ]
+    },
+    {
+      "operatingsystem": "CentOS",
+      "operatingsystemrelease": [ "6" ]
+    },
+    {
+      "operatingsystem": "Scientific",
+      "operatingsystemrelease": [ "6" ]
+    },
+    {
+      "operatingsystem": "OEL",
+      "operatingsystemrelease": [ "6" ]
+    }
+  ],
+  "requirements": [
+    {
+      "name": "puppet",
+      "version_requirement": ">= 3.8.0"
     }
   ]
 }
