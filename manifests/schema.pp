@@ -1,7 +1,7 @@
 define openldap::schema (
-                          $schemaname=$name,
                           $ldif,
-                          $replace=true,
+                          $schemaname = $name,
+                          $replace    = true,
                         ){
 
   #TODO: habilitar el files/openssh-ldap.ldif
