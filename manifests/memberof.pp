@@ -4,12 +4,12 @@ class openldap::memberof(
 
   file { "${openldap::slapdtmpbase}/enablememberof":
     ensure  => present,
-    owner   => "root",
-    group   => "root",
-    mode    => 0640,
-    require => Exec["bash initdb"],
-    content => template("openldap/enablememberof.erb"),
-    notify  => Exec["bash enablememberof"],
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0640',
+    require => Exec['bash initdb'],
+    content => template("${module_name}/enablememberof.erb"),
+    notify  => Exec['bash enablememberof'],
     audit   => 'content',
   }
 
