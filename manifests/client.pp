@@ -7,5 +7,4 @@ class openldap::client($host, $base) inherits openldap::params {
     mode    => '0644',
     content => template("${module_name}/client/ldap.erb"),
   }
-
 }

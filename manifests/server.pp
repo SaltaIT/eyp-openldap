@@ -1,16 +1,28 @@
 class openldap::server(
-												$base, $admin, $adminpassword, $oname,
-												$slapdtmpbase=$openldap::params::slapdtmpbase,
-												$isMaster=false, $masterinfo=undef, $mm=undef, $serverid=1,
-												$backend='bdb', $updateref=undef, $chainingoverlay=undef,
-												$customschema=undef, $custominitdb=undef,
-												$mdbsize=9126805504,
-												$tlsca=undef, $tlscert=undef, $tlspk=undef, $tlsstrongciphers=true,
-												$debuglevel="0",
-												$checkmdbusage="/usr/local/bin/check_mdb_usage",
-												$idletimeout='300',
-												$writetimeout='300',
-												$anonbind=false,
+												$base,
+												$admin,
+												$adminpassword,
+												$oname,
+												$slapdtmpbase     = $openldap::params::slapdtmpbase,
+												$isMaster         = false,
+												$masterinfo       = undef,
+												$mm               = undef,
+												$serverid         = '1',
+												$backend          = 'bdb',
+												$updateref        = undef,
+												$chainingoverlay  = undef,
+												$customschema     = undef,
+												$custominitdb     = undef,
+												$mdbsize          = '9126805504',
+												$tlsca            = undef,
+												$tlscert          = undef,
+												$tlspk            = undef,
+												$tlsstrongciphers = true,
+												$debuglevel       = '0',
+												$checkmdbusage    = '/usr/local/bin/check_mdb_usage',
+												$idletimeout      = '300',
+												$writetimeout     = '300',
+												$anonbind         = false,
 											) {
 
 	#Openldap::Schema <| |> -> Openldap::Indexes <| |>
@@ -39,18 +51,18 @@ class openldap::server(
 	}
 
 	package { $openldap::params::ldapserver_pkg:
-		ensure => "installed",
+		ensure  => "installed",
 		require => Class['openldap::params'], #ugly hack
 	}
 
 	if($checkmdbusage)
 	{
 		file { "$checkmdbusage":
-			ensure => present,
-			owner => "root",
-			group => "root",
-			mode => 0755,
-			content => template("openldap/check_mdb_usage.erb")
+			ensure  => present,
+			owner   => "root",
+			group   => "root",
+			mode    => '0755',
+			content => template("${module_name}/check_mdb_usage.erb")
 		}
 	}
 
@@ -63,64 +75,64 @@ class openldap::server(
 	if ($backend == "bdb")
 	{
 		file { '/var/lib/ldap/DB_CONFIG':
-			ensure => present,
-			owner => "root",
-			group => "root",
-			mode => 0644,
+			ensure  => present,
+			owner   => "root",
+			group   => "root",
+			mode    => 0644,
 			require => Package[$openldap::params::ldapserver_pkg],
 			notify  => Service["slapd"],
-			content => template("openldap/dbconfig.erb")
+			content => template("${module_name}/dbconfig.erb")
 		}
 	}
 
 	if ($tlsca) and ($tlscert) and ($tlspk)
 	{
 		package { "openssl":
-			ensure => "installed",
+			ensure  => "installed",
 			require => Exec['bash initdb'],
 		}
 
 		file { "/etc/pki/tls/private/openldap-slapd.pk":
-			ensure => present,
-			owner => "ldap",
-			group => "root",
-			mode => 0400,
+			ensure  => present,
+			owner   => "ldap",
+			group   => "root",
+			mode    => '0400',
 			require => Package["openssl"],
 			replace => false,
-			source => $tlspk,
-			notify => Exec["bash enabletls"],
+			source  => $tlspk,
+			notify  => Exec["bash enabletls"],
 		}
 
 		file { "/etc/pki/tls/certs/openldap-slapd-ca.crt":
-			ensure => present,
-			owner => "ldap",
-			group => "root",
-			mode => 0400,
+			ensure  => present,
+			owner   => "ldap",
+			group   => "root",
+			mode    => '0400',
 			require => Package["openssl"],
 			replace => false,
-			source => $tlsca,
-			notify => Exec["bash enabletls"],
+			source  => $tlsca,
+			notify  => Exec["bash enabletls"],
 		}
 
 		file { "/etc/pki/tls/certs/openldap-slapd-cert.crt":
-			ensure => present,
-			owner => "ldap",
-			group => "root",
-			mode => 0400,
+			ensure  => present,
+			owner   => "ldap",
+			group   => "root",
+			mode    => '0400',
 			require => Package["openssl"],
 			replace => false,
-			source => $tlscert,
-			notify => Exec["bash enabletls"],
+			source  => $tlscert,
+			notify  => Exec["bash enabletls"],
 		}
 	}
 
 	#sysconfig
 
 	file { "/etc/sysconfig/ldap":
-		ensure => 'present',
-		owner => "root",
-		group => 'root',
-		mode => 644,
+		ensure  => 'present',
+		owner   => "root",
+		group   => 'root',
+		mode    => '0644',
 		notify  => Service["slapd"],
 		content => template("openldap/sysconfigldap.erb"),
 		require => Package[$openldap::params::ldapserver_pkg],
@@ -128,29 +140,29 @@ class openldap::server(
 
 
 	service { 'slapd':
-		enable => true,
-		ensure => "running",
+		enable  => true,
+		ensure  => "running",
 		require => File['/etc/sysconfig/ldap'],
 	}
 
 	file { $slapdtmpbase:
-		ensure => 'directory',
-		owner => "root",
-		group => 'root',
-		mode => 700,
+		ensure  => 'directory',
+		owner   => "root",
+		group   => 'root',
+		mode    => '0700',
 		require => Service["slapd"]
 	}
 
 	if ($customschema)
 	{
 		file { "$slapdtmpbase/init.schema":
-			ensure => present,
-			owner => "root",
-			group => "root",
-			mode => 0640,
+			ensure  => present,
+			owner   => "root",
+			group   => "root",
+			mode    => '0640',
 			require => File["$slapdtmpbase"],
 			replace => false,
-			source => $customschema
+			source  => $customschema
 		}
 
 		exec { 'init_schema':
@@ -162,29 +174,29 @@ class openldap::server(
 		if($custominitdb)
 		{
 			file { "$slapdtmpbase/custominitdb":
-				ensure => present,
-				owner => "root",
-				group => "root",
-				mode => 0640,
+				ensure  => present,
+				owner   => "root",
+				group   => "root",
+				mode    => '0640',
 				require => File["$slapdtmpbase"],
 				replace => false,
-				source => $custominitdb,
-				notify => Exec['bash initdb'],
+				source  => $custominitdb,
+				notify  => Exec['bash initdb'],
 			}
 		}
 	}
 
 	file { "$slapdtmpbase/initdb":
-		ensure => present,
-		owner => "root",
-                group => "root",
-                mode => 0640,
+		ensure  => present,
+		owner   => "root",
+    group   => "root",
+    mode    => '0640',
 		require => File["$slapdtmpbase"],
 		content => template("openldap/initdb.erb")
 	}
 
 	exec { 'sshapassword':
-   		command => "/usr/sbin/slappasswd -s $adminpassword -h '{SSHA}' > $slapdtmpbase/.sshapass",
+   	command => "/usr/sbin/slappasswd -s $adminpassword -h '{SSHA}' > $slapdtmpbase/.sshapass",
 		creates => "$slapdtmpbase/.sshapass",
 		require => File["$slapdtmpbase/initdb"]
 	}
@@ -202,19 +214,19 @@ class openldap::server(
 	}
 
 	file { "$slapdtmpbase/initreplicacio":
-                ensure => present,
-                owner => "root",
-                group => "root",
-                mode => 0640,
-                require => Exec['bash initdb'],
-		content => template("openldap/initreplicacio.erb"),
-		audit => 'content',
+    ensure  => present,
+    owner   => "root",
+    group   => "root",
+    mode    => '0640',
+    require => Exec['bash initdb'],
+		content => template("${module_name}/initreplicacio.erb"),
+		audit   => 'content',
 	}
 
 	exec { 'bash initreplicacio':
-		command => "/bin/bash $slapdtmpbase/initreplicacio >> $slapdtmpbase/.replicacio.ok 2>&1",
-		subscribe => File["$slapdtmpbase/initreplicacio"],
-		creates => "$slapdtmpbase/.replicacio.ok",
+		command   => "/bin/bash ${slapdtmpbase}/initreplicacio >> ${slapdtmpbase}/.replicacio.ok 2>&1",
+		subscribe => File["${slapdtmpbase}/initreplicacio"],
+		creates   => "${slapdtmpbase}/.replicacio.ok",
 	}
 
 
