@@ -231,48 +231,48 @@ class openldap::server(
 
 
 	file { "$slapdtmpbase/initmaster":
-		ensure => present,
-                owner => "root",
-                group => "root",
-                mode => 0640,
+		ensure  => 'present',
+    owner   => "root",
+    group   => "root",
+    mode    => '0640',
 		require => Exec["bash initreplicacio"],
-		content => template("openldap/initmaster.erb")
+		content => template("${module_name}/initmaster.erb")
 	}
 
 	exec { 'bash initmaster':
-		command => "/bin/bash $slapdtmpbase/initmaster >> $slapdtmpbase/.master.ok 2>&1",
+		command   => "/bin/bash $slapdtmpbase/initmaster >> $slapdtmpbase/.master.ok 2>&1",
 		subscribe => File["$slapdtmpbase/initmaster"],
-		creates => "$slapdtmpbase/.master.ok",
+		creates   => "$slapdtmpbase/.master.ok",
 	}
 
 	file { "$slapdtmpbase/initslave":
-                ensure => present,
-                owner => "root",
-                group => "root",
-                mode => 0640,
-                require => Exec["bash initmaster"],
-                content => template("openldap/initslave.erb")
-        }
+    ensure  => present,
+    owner   => "root",
+    group   => "root",
+    mode    => '0640',
+    require => Exec["bash initmaster"],
+    content => template("${module_name}/initslave.erb")
+	}
 
 	exec { 'bash initslave':
-		command => "/bin/bash $slapdtmpbase/initslave >> $slapdtmpbase/.slave.ok 2>&1",
-		subscribe => File["$slapdtmpbase/initslave"],
-		creates => "$slapdtmpbase/.slave.ok",
+		command   => "/bin/bash ${slapdtmpbase}/initslave >> ${slapdtmpbase}/.slave.ok 2>&1",
+		subscribe => File["${slapdtmpbase}/initslave"],
+		creates   => "${slapdtmpbase}/.slave.ok",
 	}
 
 	file { "$slapdtmpbase/initmm":
-		ensure => present,
-                owner => "root",
-                group => "root",
-                mode => 0640,
-                require => Exec["bash initslave"],
-		content => template("openldap/initmm.erb"),
+		ensure  => present,
+    owner   => "root",
+    group   => "root",
+    mode    => '0640',
+    require => Exec["bash initslave"],
+		content => template("${module_name}/initmm.erb"),
 	}
 
 	exec { 'bash initmm':
-		command => "/bin/bash $slapdtmpbase/initmm >> $slapdtmpbase/.mm.ok 2>&1",
-		subscribe => File["$slapdtmpbase/initmm"],
-		creates => "$slapdtmpbase/.mm.ok",
+		command   => "/bin/bash ${slapdtmpbase}/initmm >> ${slapdtmpbase}/.mm.ok 2>&1",
+		subscribe => File["${slapdtmpbase}/initmm"],
+		creates   => "${slapdtmpbase}/.mm.ok",
 	}
 
 	#
@@ -280,18 +280,18 @@ class openldap::server(
 	#
 
 	file { "$slapdtmpbase/mdbsize":
-		ensure => present,
-                owner => "root",
-                group => "root",
-                mode => 0640,
-                require => Exec["bash initdb"],
-		content => template("openldap/mdbsize.erb"),
-		notify => Exec["bash mdbsize"],
-		audit => 'content',
+		ensure  => present,
+    owner   => "root",
+    group   => "root",
+    mode    => '0640',
+    require => Exec["bash initdb"],
+		content => template("${module_name}/mdbsize.erb"),
+		notify  => Exec["bash mdbsize"],
+		audit   => 'content',
 	}
 
 	exec { 'bash mdbsize':
-		command => "/bin/bash $slapdtmpbase/mdbsize",
+		command     => "/bin/bash ${slapdtmpbase}/mdbsize",
 		refreshonly => true,
 	}
 
@@ -300,18 +300,18 @@ class openldap::server(
 	#
 
 	file { "$slapdtmpbase/enabletls":
-		ensure => present,
-                owner => "root",
-                group => "root",
-                mode => 0640,
-                require => Exec["bash initdb"],
-		content => template("openldap/enabletls.erb"),
-		notify => Exec["bash enabletls"],
-		audit => 'content',
+		ensure  => present,
+    owner   => "root",
+    group   => "root",
+    mode    => '0640',
+    require => Exec["bash initdb"],
+		content => template("${module_name}/enabletls.erb"),
+		notify  => Exec["bash enabletls"],
+		audit   => 'content',
 	}
 
 	exec { 'bash enabletls':
-		command     => "/bin/bash $slapdtmpbase/enabletls",
+		command     => "/bin/bash ${slapdtmpbase}/enabletls",
 		refreshonly => true,
 	}
 
@@ -371,7 +371,7 @@ class openldap::server(
 	}
 
 	exec { 'bash anonbind':
-		command => "/bin/bash ${slapdtmpbase}/anonbind",
+		command     => "/bin/bash ${slapdtmpbase}/anonbind",
 		refreshonly => true,
 	}
 
@@ -390,10 +390,10 @@ class openldap::server(
 		audit   => 'content',
 	}
 
+	#tarda bastant -_-
 	exec { 'bash serverid':
 		command => "/bin/bash ${slapdtmpbase}/serverid",
 		refreshonly => true,
-		#tarda bastant -_-
 		timeout => 0,
 	}
 
