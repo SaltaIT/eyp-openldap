@@ -8,8 +8,8 @@ define openldap::schema (
 
   file { "${openldap::slapdtmpbase}/schema.${schemaname}.ldif":
     ensure  => present,
-    owner   => "root",
-    group   => "root",
+    owner   => 'root',
+    group   => 'root',
     mode    => '0644',
     replace => $replace,
     source  => $ldif,
@@ -19,11 +19,11 @@ define openldap::schema (
 
   file { "${openldap::slapdtmpbase}/addschema.${schemaname}":
     ensure  => present,
-    owner   => "root",
-    group   => "root",
+    owner   => 'root',
+    group   => 'root',
     mode    => '0640',
-    require => Exec["bash initdb"],
-    content => template("openldap/addschema.erb"),
+    require => Exec['bash initdb'],
+    content => template("${module_name}/addschema.erb"),
     notify  => Exec["bash addschema ${schemaname}"],
     audit   => 'content',
   }
