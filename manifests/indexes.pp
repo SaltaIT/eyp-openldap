@@ -4,12 +4,12 @@ class openldap::indexes($indexes) {
 
   file { "$openldap::slapdtmpbase/addindexes":
     ensure  => present,
-    owner   => "root",
-    group   => "root",
+    owner   => 'root',
+    group   => 'root',
     mode    => '0640',
-    require => Exec["bash initdb"],
-    content => template("openldap/addindexes.erb"),
-    notify  => Exec["bash addindexes"],
+    require => Exec['bash initdb'],
+    content => template("${module_name}/addindexes.erb"),
+    notify  => Exec['bash addindexes'],
     audit   => 'content',
   }
 
