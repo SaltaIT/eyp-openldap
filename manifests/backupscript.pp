@@ -22,16 +22,16 @@ define openldap::backupscript(
     netbackupclient::includedir{ $destination: }
   }
 
-  exec { "mkdir_p_$destination":
+  exec { "mkdir_p_${destination}":
     command     => "/bin/mkdir -p ${destinarion}",
     refreshonly => true,
   }
 
   file { $destination:
     ensure  => 'directory',
-    owner   => "root",
+    owner   => 'root',
     group   => 'root',
-    mode    => 700,
+    mode    => '0700',
     require => Exec["mkdir_p_${destination}"]
   }
 
@@ -51,8 +51,8 @@ define openldap::backupscript(
 
   file { $backupscript:
     ensure  => present,
-    owner   => "root",
-    group   => "root",
+    owner   => 'root',
+    group   => 'root',
     mode    => '0700',
     require => Package['lmdb'],
     content => template("${module_name}/openldap_backup.erb")
@@ -69,8 +69,8 @@ define openldap::backupscript(
   {
     file { '$backupscriptconf':
       ensure  => present,
-      owner   => "root",
-      group   => "root",
+      owner   => 'root',
+      group   => 'root',
       mode    => '0700',
       require => Package['lmdb'],
       content => template("${module_name}/openldap_backup_conf.erb")
@@ -80,8 +80,8 @@ define openldap::backupscript(
   {
     file { '/usr/local/bin/backupopenldap.config':
       ensure  => present,
-      owner   => "root",
-      group   => "root",
+      owner   => 'root',
+      group   => 'root',
       mode    => '0700',
       require => Package['lmdb'],
       content => template("${module_name}/openldap_backup_conf.erb")
