@@ -4,7 +4,7 @@ class openldap::server(
                         $adminpassword,
                         $oname,
                         $slapdtmpbase     = $openldap::params::slapdtmpbase,
-                        $isMaster         = false,
+                        $is_master        = false,
                         $masterinfo       = undef,
                         $mm               = undef,
                         $serverid         = '1',
