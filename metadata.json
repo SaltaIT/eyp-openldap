@@ -1,6 +1,6 @@
 {
   "name": "eyp-openldap",
-  "version": "0.4.12",
+  "version": "0.4.13",
   "author": "eyp",
   "summary": "manages OpenLDAP using OLC",
   "license": "Apache-2.0",
