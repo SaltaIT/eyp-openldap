@@ -2,7 +2,7 @@ class openldap::indexes($indexes) {
 
   validate_array($indexes)
 
-  file { "$openldap::slapdtmpbase/addindexes":
+  file { "${openldap::slapdtmpbase}/addindexes":
     ensure  => present,
     owner   => 'root',
     group   => 'root',
