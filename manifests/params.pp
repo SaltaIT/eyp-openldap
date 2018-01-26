@@ -13,10 +13,10 @@ class openldap::params {
       {
         /^6.*$/: { }
         /^7.*$/: { }
-        default: { fail("Unsupported RHEL/CentOS version!")  }
+        default: { fail('Unsupported RHEL/CentOS version!')  }
       }
     }
-    default: { fail("Unsupported OS!")  }
+    default: { fail('Unsupported OS!')  }
   }
 
   if ($openldap::updateref) and ($openldap::chainingoverlay)
@@ -29,9 +29,9 @@ class openldap::params {
     fail("mdbsize incompatible with backend ${openldap::backend}")
   }
 
-  if ($tlca) or ($tlscert) or ($tlspk)
+  if ($openldap::tlca) or ($openldap::tlscert) or ($openldap::tlspk)
   {
-    if($tlca==undef) or ($tlscert==undef) or ($tlspk==undef)
+    if($openldap::tlca==undef) or ($openldap::tlscert==undef) or ($openldap::tlspk==undef)
     {
       fail("tls error, something is missing: CA: ${openldap::tlca} CERT: ${openldap::tlscert} PK: ${openldap::tlspk}")
     }
