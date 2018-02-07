@@ -1,4 +1,7 @@
-class openldap::client($host, $base) inherits openldap::params {
+class openldap::client(
+                        $host = undef,
+                        $base = undef,
+                      ) inherits openldap::params {
 
   package { $openldap::params::ldapclient_pkg:
     ensure => 'installed',

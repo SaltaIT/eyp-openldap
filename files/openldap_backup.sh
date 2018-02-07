@@ -4,16 +4,16 @@ function initbck
 {
 	mkdir -p $DESTINATION
 	BACKUPTS=$(date +%Y%m%d%H%M)
-	
+
 	CURRENTBACKUPLOG="$LOGDIR/$BACKUPTS.log"
-	
+
 	BCKFAILED=999
-	
+
 	if [ -z "$LOGDIR" ];
 	then
 		exec 2>&1
 	else
-		exec >> $CURRENTBACKUPLOG 2>&1 
+		exec >> $CURRENTBACKUPLOG 2>&1
 	fi
 }
 
@@ -26,7 +26,7 @@ function backup_config
 		BCKFAILED=1
 	else
 		mkdir -p  $DESTINATION/$BACKUPTS
-		
+
 		$SLAPCAT -b cn=config > $DESTINATION/$BACKUPTS/config.ldif
 
 		if [ $? -eq 0 ];
@@ -66,7 +66,7 @@ function backup_bdb_hdb
 			BCKFAILED=1
 		else
 			$SLAPCAT -b $SUFFIX > $DESTINATION/$BACKUPTS/$SUFFIX.ldif
-			
+
 			if [ $? -eq 0 ];
 			then
 				echo OPENLDAPBACKUP: $DB $SUFFIX OK
@@ -78,14 +78,14 @@ function backup_bdb_hdb
 
 			#
 			# NO CANVIAR A BACKUPS INLINE
-			#			
+			#
 			#[root@ldap backup]# (echo hola; exit 1); echo $?
 			#hola
 			#1
 			#[root@ldap backup]# (echo hola; exit 1) | gzip >/dev/null; echo $?
 			#0
-			
-			
+
+
 			if [ ! -z "$GZIPBIN" ];
 			then
 				if [ -f "$DESTINATION/$BACKUPTS/$SUFFIX.ldif" ];
@@ -115,11 +115,11 @@ function backup_mdb
 				echo "mdb_copy not found, please install lmdb"
 				BCKFAILED=1
 			else
-	
+
 				mkdir -p "$DESTINATION/$BACKUPTS/$DB"
-			
+
 				$MDBCOPY "$DATADIR" "$DESTINATION/$BACKUPTS/$DB"
-		
+
 				if [ $? -eq 0 ];
 				then
 					echo OPENLDAPBACKUP: $DB OK
@@ -130,7 +130,7 @@ function backup_mdb
 				fi
 			fi
 		fi
-	done	
+	done
 }
 
 function cleanup
@@ -139,8 +139,8 @@ function cleanup
 	then
 		echo "OPENLDAPBACKUP: cleanup skipped, no RETENTION defined"
 	else
-		find $DESTINATION -type f -mtime +$RETENTION -delete	
-		find $DESTINATION -type d -empty -delete	
+		find $DESTINATION -type f -mtime +$RETENTION -delete
+		find $DESTINATION -type d -empty -delete
 	fi
 }
 
@@ -172,7 +172,7 @@ function mailer
 					$MAILCMD -s "$IDHOST-OpenLDAP-ERROR" $MAILTO < $CURRENTBACKUPLOG
 				fi
 			fi
-		fi	
+		fi
 	fi
 }
 
@@ -182,11 +182,12 @@ BASEDIRBCK=$(dirname $0)
 BASENAMEBCK=$(basename $0)
 IDHOST=${IDHOST-$(hostname -s)}
 
-<% if defined?(@backupscriptconf) -%>
-. <%= @backupscriptconf %>
-<% else -%>
+if [ ! -z "$1" ];
+then
+. $1
+else
 . $BASEDIRBCK/${BASENAMEBCK%%.*}.config 2>/dev/null
-<% end -%>
+fi
 
 LDAPSEARCH=$(which ldapsearch 2>/dev/null)
 if [ -z "$LDAPSEARCH" ];
@@ -208,4 +209,3 @@ backup_bdb_hdb
 cleanup
 
 mailer
-
