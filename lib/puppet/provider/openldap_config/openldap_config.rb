@@ -15,7 +15,7 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
       debug "setting "+config[0]+": "+config[1]
       new(
         :ensure => :present,
-        :name => config[0]
+        :name => config[0],
         :value => config[1]
         )
     end
