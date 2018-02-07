@@ -40,36 +40,58 @@ class openldap::server(
   if ($customschema!=undef) { validate_string($customschema) }
   #if ($mdbsize) { validate_integer($mdbsize) }
   if ($checkmdbusage!=undef) { validate_absolute_path($checkmdbusage) }
-
   if ($masterinfo!=undef) { validate_array($masterinfo) }
 
 
-  #WTF? marranda per validar al params, shauria de refer
-  if(!defined(Class['openldap::params']))
+  if ($openldap::server::updateref) and ($openldap::server::chainingoverlay)
   {
-    class { 'openldap::params': }
+    fail("updateref (${openldap::server::updateref}) and chainingoverlay (${openldap::server::chainingoverlay}) are incompatible")
   }
 
-  package { $openldap::params::ldapserver_pkg:
-    ensure  => 'installed',
-    require => Class['openldap::params'], #ugly hack
+  if($openldap::server::backend != 'mdb') and ($openldap::server::mdbsize)
+  {
+    fail("mdbsize incompatible with backend ${openldap::server::backend}")
   }
 
-  if($checkmdbusage)
+  if ($openldap::server::tlca) or ($openldap::server::tlscert) or ($openldap::server::tlspk)
   {
-    file { $checkmdbusage:
-      ensure  => 'present',
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0755',
-      content => template("${module_name}/check_mdb_usage.erb")
+    if($openldap::server::tlca==undef) or ($openldap::server::tlscert==undef) or ($openldap::server::tlspk==undef)
+    {
+      fail("tls error, something is missing: CA: ${openldap::server::tlca} CERT: ${openldap::server::tlscert} PK: ${openldap::server::tlspk}")
+    }
+  }
+
+  if($openldap::server::backend)
+  {
+    case $openldap::server::backend
+    {
+      'bdb': { }
+      'mdb': { }
+      default: { fail("${openldap::server::backend} is not supported") }
     }
   }
 
   if ($mm!=undef)
   {
     validate_array($mm)
-    #validate_integer($serverid)
+  }
+
+  include ::openldap
+  include ::openldap::client
+
+  package { $openldap::params::ldapserver_pkg:
+    ensure  => 'installed',
+  }
+
+  if($checkmdbusage!=undef)
+  {
+    file { $checkmdbusage:
+      ensure  => 'present',
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0755',
+      content => file("${module_name}/check_mdb_usage.sh")
+    }
   }
 
   if ($backend == 'bdb')
@@ -80,7 +102,7 @@ class openldap::server(
       group   => 'root',
       mode    => '0644',
       require => Package[$openldap::params::ldapserver_pkg],
-      notify  => Service['slapd'],
+      notify  => Class['::openldap::server::service'],
       content => template("${module_name}/dbconfig.erb")
     }
   }
@@ -133,24 +155,19 @@ class openldap::server(
     owner   => 'root',
     group   => 'root',
     mode    => '0644',
-    notify  => Service['slapd'],
+    notify  => Class['::openldap::server::service'],
     content => template("${module_name}/sysconfigldap.erb"),
     require => Package[$openldap::params::ldapserver_pkg],
   }
 
-
-  service { 'slapd':
-    ensure  => 'running',
-    enable  => true,
-    require => File['/etc/sysconfig/ldap'],
-  }
+  include ::openldap::server::service
 
   file { $slapdtmpbase:
     ensure  => 'directory',
     owner   => 'root',
     group   => 'root',
     mode    => '0700',
-    require => Service['slapd']
+    require => Class['::openldap::server::service']
   }
 
   if ($customschema)
