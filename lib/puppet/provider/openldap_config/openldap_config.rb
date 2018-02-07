@@ -1,3 +1,5 @@
+require 'tempfile'
+
 Puppet::Type.type(:openldap_config).provide(:openldap_config) do
   desc 'openldap_config'
 
@@ -33,6 +35,41 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
     @property_hash[:ensure] == :present || false
   end
 
+  def create
+    file = Tempfile.new('openldap_config')
+    begin
+      file << "dn: cn=config\n"
+      if resource[:value].is_a? Hash
+        resource[:value].each do |k, v|
+          file << "add: #{k}\n"
+          if v.is_a? Array
+            v.each { |x| t << "#{k}: #{x}\n" }
+          else
+            file << "#{k}: #{v}\n"
+          end
+          file << "-\n"
+        end
+      else
+        file << "add: #{resource[:name]}\n"
+        file << "#{resource[:name]}: #{resource[:value]}\n"
+      end
+      file.close
+
+      # file.path
+      Puppet.debug(IO.read file.path)
+    ensure
+      file.unlink
+    end
+  end
+
+  def value
+  end
+
+  def value=
+  end
+
+  def destroy
+  end
 end
 # [root@centos7 ~]# ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config  -s base 2>/dev/null
 # # extended LDIF
