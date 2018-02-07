@@ -13,6 +13,7 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
   end
 
   def self.instances
+    debug "instances"
     ldapsearch(['-Y','EXTERNAL','-H','ldapi:///','-b','cn=config','-s','base']).scan(/^(olc[a-zA-Z]+): (.*)$/).collect do |config|
       debug "setting "+config[0]+": "+config[1]
       new(
@@ -21,21 +22,27 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
         :value => config[1]
         )
     end
+    debug "instances done"
   end
 
   def self.prefetch(resources)
+    debug "prefetch"
     resources.keys.each do |name|
       if provider = instances.find{ |db| db.name == name }
         resources[name].provider = provider
       end
     end
+    debug "prefetch done"
   end
 
   def exists?
+    debug "exists?"
     @property_hash[:ensure] == :present || false
+    debug "exists? done"
   end
 
   def create
+    debug "create"
     file = Tempfile.new('openldap_confgi', '/tmp')
     begin
       file << "dn: cn=config\n"
@@ -50,6 +57,7 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
     ensure
       file.unlink
     end
+    debug "create done"
   end
 
   def value
