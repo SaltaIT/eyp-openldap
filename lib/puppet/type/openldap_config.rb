@@ -2,15 +2,22 @@ Puppet::Type.newtype(:openldap_config) do
 
   ensurable
 
-  newparam(:name) do
-  end
-
-  newparam(:target) do
+  newparam(:name, :namevar => true) do
+    desc 'attribute to manage'
+    validate do |value|
+      unless value.is_a?(String)
+        raise Pupper::Error,
+          "not a string, modafuca"
+      end
+    end
   end
 
   newproperty(:value) do
     validate do |value|
-      raise Puppet::Error, 'value should be a String or a Hash' unless [ String, Hash ].include? value.class
+      unless value.is_a?(String)
+        raise Pupper::Error,
+          "not a string, modafuca"
+      end
     end
   end
 

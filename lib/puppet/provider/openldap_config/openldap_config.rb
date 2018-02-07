@@ -39,20 +39,8 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
     file = Tempfile.new('openldap_config')
     begin
       file << "dn: cn=config\n"
-      if resource[:value].is_a? Hash
-        resource[:value].each do |k, v|
-          file << "add: #{k}\n"
-          if v.is_a? Array
-            v.each { |x| t << "#{k}: #{x}\n" }
-          else
-            file << "#{k}: #{v}\n"
-          end
-          file << "-\n"
-        end
-      else
-        file << "add: #{resource[:name]}\n"
-        file << "#{resource[:name]}: #{resource[:value]}\n"
-      end
+      file << "add: #{resource[:name]}\n"
+      file << "#{resource[:name]}: #{resource[:value]}\n"
       file.close
 
       # file.path
