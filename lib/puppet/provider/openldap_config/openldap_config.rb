@@ -11,7 +11,7 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
   end
 
   def self.instances
-    ldapsearch(['-Y','EXTERNAL','-H','ldapi:///','-b','cn=config','-s','base']).scan(/^([a-zA-Z]+): (.*)$/).collect do |config|
+    ldapsearch(['-Y','EXTERNAL','-H','ldapi:///','-b','cn=config','-s','base']).scan(/^(olc[a-zA-Z]+): (.*)$/).collect do |config|
       debug "setting "+config[0]+": "+config[1]
       new(
         :ensure => :present,
