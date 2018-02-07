@@ -24,8 +24,9 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
   end
 
   def self.prefetch(resources)
+    items = instances
     resources.keys.each do |name|
-      if provider = instances.find{ |setting| setting.name == name }
+      if provider = items.find{ |item| item.name == name }
         resources[name].provider = provider
       end
     end
@@ -36,18 +37,22 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
   end
 
   def create
-    file = Tempfile.new('openldap_config')
-    begin
-      file << "dn: cn=config\n"
-      file << "add: #{resource[:name]}\n"
-      file << "#{resource[:name]}: #{resource[:value]}\n"
-      file.close
-
-      # file.path
-      Puppet.debug(IO.read file.path)
-    ensure
-      file.unlink
-    end
+    # file = Tempfile.new('openldap_confgi', '/tmp')
+    # begin
+    #   file << "dn: cn=config\n"
+    #   file << "add: #{resource[:name]}\n"
+    #   file << "#{resource[:name]}: #{resource[:value]}\n"
+    #   file.close
+    #
+    #   # file.path
+    #   # Puppet.debug(IO.read file.path)
+    #   fh = open filename
+    #   content = fh.read
+    #   debug content
+    #   fh.close
+    # ensure
+    #   file.unlink
+    # end
   end
 
   def value
