@@ -61,12 +61,15 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
   end
 
   def value
+    debug "value"
   end
 
   def value=
+    debug "value igual"
   end
 
   def destroy
+    debug "destroy"
   end
 end
 # [root@centos7 ~]# ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config  -s base 2>/dev/null
