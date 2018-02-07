@@ -12,16 +12,6 @@ define openldap::backupscript(
 
   validate_string($destination)
 
-  #if ($openldap::mdb == "mdb")
-  #{
-  #	warn("http://www.openldap.org/faq/data/cache/287.html")
-  #}
-
-  if defined(Class['netbackupclient'])
-  {
-    netbackupclient::includedir{ $destination: }
-  }
-
   exec { "mkdir_p_${destination}":
     command     => "/bin/mkdir -p ${destination}",
     refreshonly => true,
