@@ -40,10 +40,10 @@ To setup a standalone OpenLDAP using dc=systemadmin,dc=es as RootDN with cn=admi
 node 'ldap'
 {
         class { 'openldap':
-                base => 'dc=systemadmin,dc=es',
-                admin => 'admin',
+                base          => 'dc =systemadmin,dc =es',
+                admin         => 'admin',
                 adminpassword => '123password',
-                oname => 'systemadmin.es rulez',
+                oname         => 'systemadmin.es rulez',
         }
 }
 ```
@@ -54,11 +54,11 @@ To setup a OpenLDAP in master mode:
 node 'ldap'
 {
         class { 'openldap':
-                base => 'dc=systemadmin,dc=es',
-                admin => 'admin',
+                base          => 'dc =systemadmin,dc =es',
+                admin         => 'admin',
                 adminpassword => '123password',
-                oname => 'systemadmin.es rulez',
-                isMaster => true,
+                oname         => 'systemadmin.es rulez',
+                isMaster      => true,
         }
 }
 ```
@@ -69,11 +69,11 @@ To setup a OpenLDAP in slave mode:
 node 'ldapslave1','ldapslave2'
 {
         class { 'openldap':
-                base => 'dc=systemadmin,dc=es',
-                admin => 'admin',
+                base          => 'dc =systemadmin,dc =es',
+                admin         => 'admin',
                 adminpassword => '123password',
-                oname => 'systemadmin.es rulez',
-                masterinfo=> [ "192.168.96.250" ],
+                oname         => 'systemadmin.es rulez',
+                masterinfo    => [ "192.168.96.250" ],
         }
 }
 ```
@@ -84,13 +84,13 @@ To setup a OpenLDAP un multimaster mode:
 node 'ldapmm1'
 {
         class { 'openldap':
-                base => 'dc=systemadmin,dc=es',
-                admin => 'admin',
+                base          => 'dc =systemadmin,dc =es',
+                admin         => 'admin',
                 adminpassword => '123password',
-                oname => 'systemadmin.es rulez',
-                isMaster => true,
-                serverid => 1,
-                mm => [ "10.10.10.2" ],
+                oname         => 'systemadmin.es rulez',
+                isMaster      => true,
+                serverid      => 1,
+                mm            => [ "10.10.10.2" ],
         }
 }
 
@@ -98,13 +98,13 @@ node 'ldapmm1'
 node 'ldapmm2'
 {
         class { 'openldap':
-                base => 'dc=systemadmin,dc=es',
-                admin => 'admin',
+                base          => 'dc =systemadmin,dc =es',
+                admin         => 'admin',
                 adminpassword => '123password',
-                oname => 'systemadmin.es rulez',
-                isMaster => true,
-                serverid => 2,
-                mm => [ "10.10.10.1" ],
+                oname         => 'systemadmin.es rulez',
+                isMaster      => true,
+                serverid      => 2,
+                mm            => [ "10.10.10.1" ],
         }
 }
 ```
@@ -112,16 +112,16 @@ node 'ldapmm2'
 To setup LDAP with mdb backend and TLS enabled:
 ```puppet
 class { 'openldap':
-  base => 'o=AOP,ou=system',
-  admin => 'Manager',
+  base          => 'o =AOP,ou =system',
+  admin         => 'Manager',
   adminpassword => 'cacadevaca',
-  oname => 'admin',
-  isMaster => true,
-  backend => 'mdb',
-  mdbsize => 12345678,
-  tlsca => 'puppet:///openldap/masterauth/ccc-ca.crt',
-  tlscert => 'puppet:///openldap/masterauth/ldap-master-01.crt',
-  tlspk => 'puppet:///openldap/masterauth/ldap-master-01.key.pem',
+  oname         => 'admin',
+  isMaster      => true,
+  backend       => 'mdb',
+  mdbsize       => 12345678,
+  tlsca         => 'puppet:///openldap/masterauth/ccc-ca.crt',
+  tlscert       => 'puppet:///openldap/masterauth/ldap-master-01.crt',
+  tlspk         => 'puppet:///openldap/masterauth/ldap-master-01.key.pem',
 }
 ```
 
