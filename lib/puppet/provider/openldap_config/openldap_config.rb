@@ -28,8 +28,10 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
   def self.prefetch(resources)
     debug "prefetch"
     resources.keys.each do |name|
-      if provider = instances.find{ |db| db.name == name }
-        resources[name].provider = provider
+      unless instances.nil?
+        if provider = instances.find{ |db| db.name == name }
+          resources[name].provider = provider
+        end
       end
     end
     debug "prefetch done"
