@@ -448,8 +448,8 @@ class openldap::server(
   if(anonbind)
   {
     openldap_config { 'olcDisallows':
-  		ensure => 'absent',
-  	}
+      ensure => 'absent',
+    }
   }
   else
   {
