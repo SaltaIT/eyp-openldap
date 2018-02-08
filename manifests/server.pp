@@ -445,7 +445,7 @@ class openldap::server(
   # add: olcDisallows
   # olcDisallows: bind_anon
 
-  if(anonbind)
+  if($anonbind)
   {
     openldap_config { 'olcDisallows':
       ensure => 'absent',
