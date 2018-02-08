@@ -3,7 +3,8 @@ require 'tempfile'
 Puppet::Type.type(:openldap_config).provide(:openldap_config) do
   desc 'openldap_config'
 
-  commands :ldapsearch => '/usr/bin/ldapsearch'
+  commands  :ldapsearch => '/usr/bin/ldapsearch',
+            :ldapmodify => '/usr/bin/ldapmodify'
 
   if Puppet::Util::Package.versioncmp(Puppet.version, '3.0') >= 0
     has_command(:pip, '/usr/bin/ldapsearch') do
@@ -16,13 +17,12 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
     debug "instances"
     ldapsearch(['-Y','EXTERNAL','-H','ldapi:///','-b','cn=config','-s','base']).scan(/^(olc[a-zA-Z]+): (.*)$/).collect do |config|
       debug "setting "+config[0]+": "+config[1]
-      new(
+      Puppet::Type::Openldap_config::ProviderOpenldap_config.new(
         :ensure => :present,
         :name => config[0],
         :value => config[1]
         )
     end
-    debug "instances done"
   end
 
   def self.prefetch(resources)
@@ -34,13 +34,11 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
         end
       end
     end
-    debug "prefetch done"
   end
 
   def exists?
     debug "exists?"
     @property_hash[:ensure] == :present || false
-    debug "exists? done"
   end
 
   def create
@@ -51,23 +49,52 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
       file << "add: #{resource[:name]}\n"
       file << "#{resource[:name]}: #{resource[:value]}\n"
       file.close
-
       # file.path
       Puppet.debug(IO.read file.path)
 
-
+      begin
+        ldapmodify(['-Y','EXTERNAL','-H','ldapi:///','-f',file.path])
+      rescue Exception => e
+        raise Puppet::Error, "LDIF content:\n#{IO.read t.path}\nError message: #{e.message}"
+      end
     ensure
       file.unlink
     end
-    debug "create done"
+    @property_hash[:value] = value
   end
 
   def value
     debug "value"
+    @property_hash[:value]
   end
 
-  def value=
-    debug "value igual"
+  # cat <<EOF | ldapmodify -Y EXTERNAL -H ldapi:///
+  # dn: cn=config
+  # changetype: modify
+  # replace: olcIdleTimeout
+  # olcIdleTimeout: <%= @idletimeout %>
+  # EOF
+  def value=(value)
+    debug "set value"
+    file = Tempfile.new('openldap_confgi', '/tmp')
+    begin
+      file << "dn: cn=config\n"
+      file << "changetype: modify\n"
+      file << "replace: #{name}\n"
+      file << "#{name}: #{value}\n"
+      file.close
+      # file.path
+      Puppet.debug(IO.read file.path)
+
+      begin
+        ldapmodify(['-Y','EXTERNAL','-H','ldapi:///','-f',file.path])
+      rescue Exception => e
+        raise Puppet::Error, "LDIF content:\n#{IO.read t.path}\nError message: #{e.message}"
+      end
+    ensure
+      file.unlink
+    end
+    @property_hash[:value] = value
   end
 
   def destroy
