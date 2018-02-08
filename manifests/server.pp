@@ -18,6 +18,8 @@ class openldap::server(
                         $tlscert               = undef,
                         $tlspk                 = undef,
                         $tlsstrongciphers      = true,
+                        $tls_protocol_min      = undef,
+                        $tls_cipher_suite      = undef,
                         $debuglevel            = '0',
                         $checkmdbusage         = '/usr/local/bin/check_mdb_usage',
                         $idletimeout           = '300',
@@ -354,7 +356,37 @@ class openldap::server(
 
       openldap_config { 'olcTLSCipherSuite':
         ensure => 'present',
-        value  => '3.1',
+        value  => 'HIGH:!RC4:!MD5:!3DES:!DES:!aNULL:!eNULL',
+      }
+    }
+    else
+    {
+      if($tls_protocol_min!=undef)
+      {
+        openldap_config { 'olcTLSProtocolMin':
+          ensure => 'present',
+          value  => $tls_protocol_min,
+        }
+      }
+      else
+      {
+        openldap_config { 'olcTLSProtocolMin':
+          ensure => 'absent',
+        }
+      }
+
+      if($tls_cipher_suite!=undef)
+      {
+        openldap_config { 'olcTLSCipherSuite':
+          ensure => 'present',
+          value  => $tls_cipher_suite,
+        }
+      }
+      else
+      {
+        openldap_config { 'olcTLSCipherSuite':
+          ensure => 'absent',
+        }
       }
     }
   }
