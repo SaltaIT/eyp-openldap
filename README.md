@@ -131,10 +131,10 @@ Use openldap to setup the deamon:
 
 ```puppet
         class { 'openldap':
-                base => 'dc=systemadmin,dc=es',
-                admin => 'admin',
+                base          => 'dc =systemadmin,dc =es',
+                admin         => 'admin',
                 adminpassword => '123password',
-                oname => 'systemadmin.es rulez',
+                oname         => 'systemadmin.es rulez',
         }
 ```
 
@@ -143,12 +143,12 @@ Configure a backup script
 ```puppet
 	openldap::backupscript { 'backup':
 		destination => '/backup',
-		logdir => '/backup',
-		mailto => 'spam@example.com',
-		retention => 10,
-		idhost => 'someID',
-		hour => 2,
-		minute => 0,
+		logdir      => '/backup',
+		mailto      => 'spam@example.com',
+		retention   => 10,
+		idhost      => 'someID',
+		hour        => 2,
+		minute      => 0,
 	}
 ```
 
