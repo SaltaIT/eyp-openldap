@@ -316,103 +316,113 @@ class openldap::server(
   # enable TLS
   #
 
-  file { "${slapdtmpbase}/enabletls":
-    ensure  => 'present',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0640',
-    require => Exec['bash initdb'],
-    notify  => Exec['bash enabletls'],
-    audit   => 'content',
-    content => template("${module_name}/enabletls.erb"),
+  if($tlspk!=undef)
+  {
+    # replace: olcTLSCACertificateFile
+    # olcTLSCACertificateFile: /etc/pki/tls/certs/openldap-slapd-ca.crt
+    openldap_config { 'olcTLSCACertificateFile':
+      ensure => 'present',
+      value  => '/etc/pki/tls/certs/openldap-slapd-ca.crt',
+    }
+    # replace: olcTLSCertificateFile
+    # olcTLSCertificateFile: /etc/pki/tls/certs/openldap-slapd-cert.crt
+    openldap_config { 'olcTLSCertificateFile':
+      ensure => 'present',
+      value  => '/etc/pki/tls/certs/openldap-slapd-cert.crt',
+    }
+    # replace: olcTLSCertificateKeyFile
+    # olcTLSCertificateKeyFile: /etc/pki/tls/private/openldap-slapd.pk
+    openldap_config { 'olcTLSCertificateKeyFile':
+      ensure => 'present',
+      value  => '/etc/pki/tls/private/openldap-slapd.pk',
+    }
+  }
+  else
+  {
+    openldap_config { 'olcTLSCACertificateFile':
+      ensure => 'absent',
+    }
+    openldap_config { 'olcTLSCertificateFile':
+      ensure => 'absent',
+    }
+    openldap_config { 'olcTLSCertificateKeyFile':
+      ensure => 'absent',
+    }
   }
 
-  exec { 'bash enabletls':
-    command     => "/bin/bash ${slapdtmpbase}/enabletls",
-    refreshonly => true,
+  if($tlsstrongciphers)
+  {
+    # replace: olcTLSProtocolMin
+    # olcTLSProtocolMin: 3.1
+    # replace: olcTLSCipherSuite
+    # olcTLSCipherSuite: HIGH:!RC4:!MD5:!3DES:!DES:!aNULL:!eNULL
+    openldap_config { 'olcTLSProtocolMin':
+      ensure => 'present',
+      value  => '3.1',
+    }
+
+    openldap_config { 'olcTLSCipherSuite':
+      ensure => 'present',
+      value  => '3.1',
+    }
   }
 
   #
   # log level
-  #
-
-  file { "${slapdtmpbase}/loglevel":
-    ensure  => 'present',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0640',
-    require => Exec['bash initdb'],
-    content => template("${module_name}/loglevel.erb"),
-    notify  => Exec['bash loglevel'],
-    audit   => 'content',
+  # replace: olcLogLevel
+  # olcLogLevel: <%= @debuglevel %>
+  openldap_config { 'olcLogLevel':
+    ensure => 'present',
+    value  => $debuglevel,
   }
 
-  exec { 'bash loglevel':
-    command     => "/bin/bash ${slapdtmpbase}/loglevel",
-    refreshonly => true,
-  }
 
   #
-  # idle timeout
+  # timeouts
   #
+  # replace: olcIdleTimeout
+  # olcIdleTimeout: <%= @idletimeout %>
+  # idletimeout
+  #
+  # replace: olcWriteTimeout
+  # olcWriteTimeout: <%= @writetimeout %>
+  # writetimeout
 
-  file { "${slapdtmpbase}/idletimeouts":
-    ensure  => 'present',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0640',
-    require => Exec['bash initdb'],
-    content => template("${module_name}/idletimeouts.erb"),
-    notify  => Exec['bash idletimeouts'],
-    audit   => 'content',
+  openldap_config { 'olcIdleTimeout':
+    ensure => 'present',
+    value  => $idletimeout,
   }
 
-  exec { 'bash idletimeouts':
-    command     => "/bin/bash ${slapdtmpbase}/idletimeouts",
-    refreshonly => true,
+  openldap_config { 'olcWriteTimeout':
+    ensure => 'present',
+    value  => $writetimeout,
   }
 
   #
   # anon bind
-  #
+  # add: olcDisallows
+  # olcDisallows: bind_anon
 
-  file { "${slapdtmpbase}/anonbind":
-    ensure  => 'present',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0640',
-    require => Exec['bash initdb'],
-    content => template("${module_name}/anonbind.erb"),
-    notify  => Exec['bash anonbind'],
-    audit   => 'content',
+  if(anonbind)
+  {
+    openldap_config { 'olcDisallows':
+  		ensure => 'absent',
+  	}
   }
-
-  exec { 'bash anonbind':
-    command     => "/bin/bash ${slapdtmpbase}/anonbind",
-    refreshonly => true,
+  else
+  {
+    openldap_config { 'olcDisallows':
+      ensure => 'present',
+      value  => 'bind_anon',
+    }
   }
 
   #
   # server ID
-  #
-
-  file { "${slapdtmpbase}/serverid":
-    ensure  => 'present',
-    owner   => 'root',
-    group   => 'root',
-    mode    => '0640',
-    require => Exec['bash initdb'],
-    content => template("${module_name}/serverid.erb"),
-    notify  => Exec['bash serverid'],
-    audit   => 'content',
+  # replace: olcServerID
+  # olcServerID: <%= @serverid %>
+  openldap_config { 'olcServerID':
+    ensure => 'present',
+    value  => $serverid,
   }
-
-  #tarda bastant -_-
-  exec { 'bash serverid':
-    command     => "/bin/bash ${slapdtmpbase}/serverid",
-    refreshonly => true,
-    timeout     => 0,
-  }
-
-
 }
