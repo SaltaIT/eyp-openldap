@@ -99,6 +99,23 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
 
   def destroy
     debug "destroy"
+    file = Tempfile.new('openldap_confgi', '/tmp')
+    begin
+      file << "dn: cn=config\n"
+      t << "delete: #{name}\n"
+      file.close
+      # file.path
+      Puppet.debug(IO.read file.path)
+
+      begin
+        ldapmodify(['-Y','EXTERNAL','-H','ldapi:///','-f',file.path])
+      rescue Exception => e
+        raise Puppet::Error, "LDIF content:\n#{IO.read t.path}\nError message: #{e.message}"
+      end
+    ensure
+      file.unlink
+    end
+    @property_hash.clear
   end
 end
 # [root@centos7 ~]# ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config  -s base 2>/dev/null
