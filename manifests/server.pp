@@ -340,6 +340,23 @@ class openldap::server(
       ensure => 'present',
       value  => '/etc/pki/tls/private/openldap-slapd.pk',
     }
+
+    if($tlsstrongciphers)
+    {
+      # replace: olcTLSProtocolMin
+      # olcTLSProtocolMin: 3.1
+      # replace: olcTLSCipherSuite
+      # olcTLSCipherSuite: HIGH:!RC4:!MD5:!3DES:!DES:!aNULL:!eNULL
+      openldap_config { 'olcTLSProtocolMin':
+        ensure => 'present',
+        value  => '3.1',
+      }
+
+      openldap_config { 'olcTLSCipherSuite':
+        ensure => 'present',
+        value  => '3.1',
+      }
+    }
   }
   else
   {
@@ -352,22 +369,11 @@ class openldap::server(
     openldap_config { 'olcTLSCertificateKeyFile':
       ensure => 'absent',
     }
-  }
-
-  if($tlsstrongciphers)
-  {
-    # replace: olcTLSProtocolMin
-    # olcTLSProtocolMin: 3.1
-    # replace: olcTLSCipherSuite
-    # olcTLSCipherSuite: HIGH:!RC4:!MD5:!3DES:!DES:!aNULL:!eNULL
     openldap_config { 'olcTLSProtocolMin':
-      ensure => 'present',
-      value  => '3.1',
+      ensure => 'absent',
     }
-
     openldap_config { 'olcTLSCipherSuite':
-      ensure => 'present',
-      value  => '3.1',
+      ensure => 'absent',
     }
   }
 
