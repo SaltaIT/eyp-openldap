@@ -102,7 +102,7 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
     file = Tempfile.new('openldap_confgi', '/tmp')
     begin
       file << "dn: cn=config\n"
-      t << "delete: #{name}\n"
+      file << "delete: #{name}\n"
       file.close
       # file.path
       Puppet.debug(IO.read file.path)
