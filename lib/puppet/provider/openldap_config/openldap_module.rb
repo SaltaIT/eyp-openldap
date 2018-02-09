@@ -142,6 +142,40 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
     @property_hash[:ensure] = :present
   end
 
+  def path
+    debug "path"
+    @property_hash[:path]
+  end
+
+  def path=
+    debug "set value"
+    file = Tempfile.new('openldap_module_path', '/tmp')
+    begin
+      file << "dn: cn=module,cn=config\n"
+      file << "changetype: modify\n"
+      file << "replace: olcModulePath\n"
+      file << "olcModulePath: #{path}\n"
+      # dn: cn=module,cn=config
+      # changetype: add
+      # objectClass: olcModuleList
+      # cn: module
+      # olcModulePath: /usr/lib64/openldap
+      # olcModuleLoad: syncprov.la
+      file.close
+      # file.path
+      Puppet.debug(IO.read file.path)
+
+      begin
+        ldapmodify(['-Y','EXTERNAL','-H','ldapi:///','-f',file.path])
+      rescue Exception => e
+        raise Puppet::Error, "LDIF content:\n#{IO.read t.path}\nError message: #{e.message}"
+      end
+    ensure
+      file.unlink
+    end
+    @property_hash[:path] = path
+  end
+
 end
 # [root@centos7 ~]# ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=module,cn=config  '(objectClass=olcModuleList)'
 # SASL/EXTERNAL authentication started
