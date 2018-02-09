@@ -15,7 +15,6 @@ Puppet::Type.newtype(:openldap_config) do
   newproperty(:path) do
     desc "olcModulePath"
     defaultto '/usr/lib64/openldap'
-    end
     validate do |value|
       unless value.is_a?(String)
         raise Pupper::Error,
