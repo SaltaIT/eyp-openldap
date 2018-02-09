@@ -151,17 +151,29 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
     debug "set value"
     file = Tempfile.new('openldap_module_path', '/tmp')
     begin
-      # TODO: fer add si no existia
-      file << "dn: cn=module,cn=config\n"
-      file << "changetype: modify\n"
-      file << "replace: olcModulePath\n"
-      file << "olcModulePath: #{value}\n"
-      # dn: cn=module,cn=config
-      # changetype: add
-      # objectClass: olcModuleList
-      # cn: module
-      # olcModulePath: /usr/lib64/openldap
-      # olcModuleLoad: syncprov.la
+      if @property_hash[:path] == ''
+        file << "dn: cn=module,cn=config\n"
+        file << "changetype: add\n"
+        file << "olcModulePath: #{value}\n"
+        # dn: cn=module,cn=config
+        # changetype: add
+        # objectClass: olcModuleList
+        # cn: module
+        # olcModulePath: /usr/lib64/openldap
+        # olcModuleLoad: syncprov.la
+      else
+        # TODO: fer add si no existia
+        file << "dn: cn=module,cn=config\n"
+        file << "changetype: modify\n"
+        file << "replace: olcModulePath\n"
+        file << "olcModulePath: #{value}\n"
+        # dn: cn=module,cn=config
+        # changetype: add
+        # objectClass: olcModuleList
+        # cn: module
+        # olcModulePath: /usr/lib64/openldap
+        # olcModuleLoad: syncprov.la
+      end
       file.close
       # file.path
       Puppet.debug(IO.read file.path)
