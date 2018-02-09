@@ -71,13 +71,15 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
         debug "nou dn: "+line
       # olcModulePath: /usr/lib64/openldap
       when /^olcModulePath/
-        if /^olcModulePath: (?<modulepath>[^\.]+).*$/ =~ line
+        if /^olcModulePath: (?<match>[^\.]+).*$/ =~ line
+          modulepath = match
           debug "match: "+modulepath
           debug "olcModulePath: "+line
         end
       # olcModuleLoad: {0}ppolicy
       when /^olcModuleLoad/
-        if /^olcModuleLoad: \{\d+\}(?<nommodule>[^\.]+).*$/ =~ line
+        if /^olcModuleLoad: \{\d+\}(?<match>[^\.]+).*$/ =~ line
+          nommodule = match
           debug "match: "+nommodule
           debug "olcModuleLoad: "+line
         end
