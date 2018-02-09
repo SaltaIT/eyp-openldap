@@ -154,7 +154,7 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
       file << "dn: cn=module,cn=config\n"
       file << "changetype: modify\n"
       file << "replace: olcModulePath\n"
-      file << "olcModulePath: #{path}\n"
+      file << "olcModulePath: #{value}\n"
       # dn: cn=module,cn=config
       # changetype: add
       # objectClass: olcModuleList
@@ -173,7 +173,7 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
     ensure
       file.unlink
     end
-    @property_hash[:path] = path
+    @property_hash[:path] = value
   end
 
 end
