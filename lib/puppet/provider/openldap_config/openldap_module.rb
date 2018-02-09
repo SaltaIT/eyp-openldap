@@ -4,7 +4,8 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
   desc 'openldap_module'
 
   commands  :ldapsearch => '/usr/bin/ldapsearch',
-            :ldapmodify => '/usr/bin/ldapmodify'
+            :ldapmodify => '/usr/bin/ldapmodify',
+            :slapcat    => '/usr/sbin/slapcat'
 
   if Puppet::Util::Package.versioncmp(Puppet.version, '3.0') >= 0
     has_command(:pip, '/usr/bin/ldapsearch') do
@@ -36,10 +37,45 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
   # end
 
   def self.instances
-    #ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=module,cn=config  '(objectClass=olcModuleList)'
-    module_list = ldapsearch(['-Y','EXTERNAL','-H','ldapi:///','-b','cn=config','-s','base']).scan(/^(olcModuleList)/)
-    # init_module_list() if module_list.empty?
+    # slapcat -n 0 | grep module -i
 
+    i = []
+
+    slapcat(['-n','0']).scan(/odule/).collect do |line|
+      # [root@centos7 ~]# slapcat -n 0 | grep odule
+      # dn: cn=module{0},cn=config
+      # objectClass: olcModuleList
+      # cn: module{0}
+      # olcModuleLoad: {0}memberof
+      # structuralObjectClass: olcModuleList
+      # dn: cn=module{1},cn=config
+      # objectClass: olcModuleList
+      # cn: module{1}
+      # olcModulePath: /usr/lib64/openldap
+      # olcModuleLoad: {0}ppolicy
+      # structuralObjectClass: olcModuleList
+      # [root@centos7 ~]#
+      case line
+      # dn: cn=module{1},cn=config
+      when /^dn:/
+        nommodule = Nil
+        pathmodule = Nil
+      # olcModulePath: /usr/lib64/openldap
+      when /^olcModulePath/
+        modulepath = line.match(/^olcModulePath: ([^\.]+).*$/).captures[0]
+      # olcModuleLoad: {0}ppolicy
+      when /^olcModuleLoad/
+        modulepath = line.match(/^olcModulePath: \{\d+\}([^\.]+).*$/).captures[0]
+      # structuralObjectClass: olcModuleList
+      when /^structuralObjectClass: /
+          i << new(
+            :ensure => :present,
+            :name   => nommodule
+            :path   => pathmodule
+          )
+      end
+    end
+    i
   end
 
   def self.prefetch(resources)
@@ -67,6 +103,7 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
       file << "objectclass: olcModuleList\n"
       file << "cn: module\n"
       file << "olcModuleLoad: #{resource[:name]}\n"
+      file << "olcModulePath: #{resource[:path]}\n"
       file.close
       # file.path
       Puppet.debug(IO.read file.path)
