@@ -55,7 +55,7 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
       begin
         ldapmodify(['-Y','EXTERNAL','-H','ldapi:///','-f',file.path])
       rescue Exception => e
-        raise Puppet::Error, "LDIF content:\n#{IO.read t.path}\nError message: #{e.message}"
+        raise Puppet::Error, "LDIF content:\n#{IO.read file.path}\nError message: #{e.message}"
       end
     ensure
       file.unlink
@@ -78,6 +78,7 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
     debug "set value"
     file = Tempfile.new('openldap_confgi', '/tmp')
     begin
+      # TODO: fer add si no existia
       file << "dn: cn=config\n"
       file << "changetype: modify\n"
       file << "replace: #{name}\n"
@@ -89,7 +90,7 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
       begin
         ldapmodify(['-Y','EXTERNAL','-H','ldapi:///','-f',file.path])
       rescue Exception => e
-        raise Puppet::Error, "LDIF content:\n#{IO.read t.path}\nError message: #{e.message}"
+        raise Puppet::Error, "LDIF content:\n#{IO.read file.path}\nError message: #{e.message}"
       end
     ensure
       file.unlink
@@ -110,7 +111,7 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
       begin
         ldapmodify(['-Y','EXTERNAL','-H','ldapi:///','-f',file.path])
       rescue Exception => e
-        raise Puppet::Error, "LDIF content:\n#{IO.read t.path}\nError message: #{e.message}"
+        raise Puppet::Error, "LDIF content:\n#{IO.read file.path}\nError message: #{e.message}"
       end
     ensure
       file.unlink
