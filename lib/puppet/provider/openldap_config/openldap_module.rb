@@ -59,8 +59,8 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
       case line
       # dn: cn=module{1},cn=config
       when /^dn:/
-        nommodule = Nil
-        pathmodule = Nil
+        nommodule = ''
+        pathmodule = ''
       # olcModulePath: /usr/lib64/openldap
       when /^olcModulePath/
         modulepath = line.match(/^olcModulePath: ([^\.]+).*$/).captures[0]
