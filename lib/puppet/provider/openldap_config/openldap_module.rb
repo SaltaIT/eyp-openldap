@@ -56,6 +56,13 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
       # olcModuleLoad: {0}ppolicy
       # structuralObjectClass: olcModuleList
       # [root@centos7 ~]#
+
+      # Debug: Puppet::Type::Openldap_module::ProviderOpenldap_module: dn: cn=module{0},cn=config
+      # Debug: Puppet::Type::Openldap_module::ProviderOpenldap_module: objectClass: olcModuleList
+      # Debug: Puppet::Type::Openldap_module::ProviderOpenldap_module: cn: module{0}
+      # Debug: Puppet::Type::Openldap_module::ProviderOpenldap_module: olcModuleLoad: {0}memberof
+      # Debug: Puppet::Type::Openldap_module::ProviderOpenldap_module: structuralObjectClass: olcModuleList
+
       case line
       # dn: cn=module{1},cn=config
       when /^dn:/
@@ -66,12 +73,12 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
         /^olcModulePath: (?<modulepath>[^\.]+).*$/ =~ line
       # olcModuleLoad: {0}ppolicy
       when /^olcModuleLoad/
-        /^olcModulePath: \{\d+\}(?<nommodule>[^\.]+).*$/ =~ line
+        /^olcModuleLoad: \{\d+\}(?<nommodule>[^\.]+).*$/ =~ line
       # structuralObjectClass: olcModuleList
       when /^structuralObjectClass: /
         debug "NEW MODULE INSTANCE"
-        debug nommodule
-        debug pathmodule
+        debug "nom: "+nommodule
+        debug "path: "+pathmodule
         i << new(
           :ensure => :present,
           :name   => nommodule,
@@ -79,6 +86,7 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
         )
       end
     end
+    debug "END loop slapcat"
     i
   end
 
