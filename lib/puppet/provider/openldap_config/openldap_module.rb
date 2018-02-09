@@ -41,7 +41,7 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
 
     i = []
 
-    slapcat(['-n','0']).scan(/odule/).collect do |line|
+    slapcat(['-n','0']).scan(/.*odule.*/).collect do |line|
       debug line
       # [root@centos7 ~]# slapcat -n 0 | grep odule
       # dn: cn=module{0},cn=config
