@@ -154,6 +154,7 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
       if @property_hash[:path] == ''
         file << "dn: cn=module,cn=config\n"
         file << "changetype: add\n"
+        file << "objectClass: olcModuleList\n"
         file << "olcModulePath: #{value}\n"
         # dn: cn=module,cn=config
         # changetype: add
