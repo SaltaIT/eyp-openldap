@@ -41,6 +41,8 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
 
     i = []
 
+    nommodule = ''
+    modulepath = ''
     slapcat(['-n','0']).scan(/.*odule.*/).collect do |line|
       debug line
       # [root@centos7 ~]# slapcat -n 0 | grep odule
@@ -62,13 +64,13 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
       # Debug: Puppet::Type::Openldap_module::ProviderOpenldap_module: cn: module{0}
       # Debug: Puppet::Type::Openldap_module::ProviderOpenldap_module: olcModuleLoad: {0}memberof
       # Debug: Puppet::Type::Openldap_module::ProviderOpenldap_module: structuralObjectClass: olcModuleList
-
       case line
       # dn: cn=module{1},cn=config
       when /^dn:/
+        debug "XX - nou dn: "+line
+        # reset
         nommodule = ''
         modulepath = ''
-        debug "XX - nou dn: "+line
       # olcModulePath: /usr/lib64/openldap
       when /^olcModulePath/
         if /^olcModulePath: (?<match>[^\.]+).*$/ =~ line
