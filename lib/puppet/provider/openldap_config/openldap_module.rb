@@ -70,7 +70,7 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
       when /^structuralObjectClass: /
           i << new(
             :ensure => :present,
-            :name   => nommodule
+            :name   => nommodule,
             :path   => pathmodule
           )
       end
