@@ -68,26 +68,26 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
       when /^dn:/
         nommodule = ''
         modulepath = ''
-        debug "nou dn: "+line
+        debug "XX - nou dn: "+line
       # olcModulePath: /usr/lib64/openldap
       when /^olcModulePath/
         if /^olcModulePath: (?<match>[^\.]+).*$/ =~ line
           modulepath = match
-          debug "match: "+modulepath
-          debug "olcModulePath: "+line
+          debug "XX - match: "+modulepath
+          debug "XX - olcModulePath: "+line
         end
       # olcModuleLoad: {0}ppolicy
       when /^olcModuleLoad/
         if /^olcModuleLoad: \{\d+\}(?<match>[^\.]+).*$/ =~ line
           nommodule = match
-          debug "match: "+nommodule
-          debug "olcModuleLoad: "+line
+          debug "XX - match: "+nommodule
+          debug "XX - olcModuleLoad: "+line
         end
       # structuralObjectClass: olcModuleList
       when /^structuralObjectClass: /
         debug "NEW MODULE INSTANCE"
-        debug "nom: "+nommodule
-        debug "path: "+modulepath
+        debug "XX - nom: "+nommodule
+        debug "XX - path: "+modulepath
         i << new(
           :ensure => :present,
           :name   => nommodule,
