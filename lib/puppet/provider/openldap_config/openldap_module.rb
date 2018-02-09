@@ -1,7 +1,7 @@
 require 'tempfile'
 
-Puppet::Type.type(:openldap_config).provide(:openldap_config) do
-  desc 'openldap_config'
+Puppet::Type.type(:openldap_module).provide(:openldap_module) do
+  desc 'openldap_module'
 
   commands  :ldapsearch => '/usr/bin/ldapsearch',
             :ldapmodify => '/usr/bin/ldapmodify'
