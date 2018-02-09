@@ -151,6 +151,7 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
     debug "set value"
     file = Tempfile.new('openldap_module_path', '/tmp')
     begin
+      # TODO: fer add si no existia
       file << "dn: cn=module,cn=config\n"
       file << "changetype: modify\n"
       file << "replace: olcModulePath\n"

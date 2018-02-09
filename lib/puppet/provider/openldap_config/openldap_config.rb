@@ -78,7 +78,6 @@ Puppet::Type.type(:openldap_config).provide(:openldap_config) do
     debug "set value"
     file = Tempfile.new('openldap_confgi', '/tmp')
     begin
-      # TODO: fer add si no existia
       file << "dn: cn=config\n"
       file << "changetype: modify\n"
       file << "replace: #{name}\n"
