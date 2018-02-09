@@ -63,10 +63,12 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
         pathmodule = ''
       # olcModulePath: /usr/lib64/openldap
       when /^olcModulePath/
-        modulepath = line.match(/^olcModulePath: (?<captura>[^\.]+).*$/).captura
+        line.match(/^olcModulePath: (?<captura>[^\.]+).*$/)
+        modulepath = captura
       # olcModuleLoad: {0}ppolicy
       when /^olcModuleLoad/
-        modulepath = line.match(/^olcModulePath: \{\d+\}(?<captura>[^\.]+).*$/).captura
+        line.match(/^olcModulePath: \{\d+\}(?<captura>[^\.]+).*$/)
+        modulepath = captura
       # structuralObjectClass: olcModuleList
       when /^structuralObjectClass: /
         debug "NEW MODULE INSTANCE"
