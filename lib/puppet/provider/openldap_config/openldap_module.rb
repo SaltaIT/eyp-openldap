@@ -29,7 +29,7 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
   #     begin
   #       ldapmodify(['-Y','EXTERNAL','-H','ldapi:///','-f',file.path])
   #     rescue Exception => e
-  #       raise Puppet::Error, "LDIF content:\n#{IO.read t.path}\nError message: #{e.message}"
+  #       raise Puppet::Error, "LDIF content:\n#{IO.read file.path}\nError message: #{e.message}"
   #     end
   #   ensure
   #     file.unlink
@@ -134,7 +134,7 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
       begin
         ldapmodify(['-Y','EXTERNAL','-H','ldapi:///','-f',file.path])
       rescue Exception => e
-        raise Puppet::Error, "LDIF content:\n#{IO.read t.path}\nError message: #{e.message}"
+        raise Puppet::Error, "LDIF content:\n#{IO.read file.path}\nError message: #{e.message}"
       end
     ensure
       file.unlink
@@ -168,7 +168,7 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
       begin
         ldapmodify(['-Y','EXTERNAL','-H','ldapi:///','-f',file.path])
       rescue Exception => e
-        raise Puppet::Error, "LDIF content:\n#{IO.read t.path}\nError message: #{e.message}"
+        raise Puppet::Error, "LDIF content:\n#{IO.read file.path}\nError message: #{e.message}"
       end
     ensure
       file.unlink
