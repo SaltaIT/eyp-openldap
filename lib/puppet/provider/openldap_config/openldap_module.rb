@@ -147,7 +147,7 @@ Puppet::Type.type(:openldap_module).provide(:openldap_module) do
     @property_hash[:path]
   end
 
-  def path=
+  def path=(value)
     debug "set value"
     file = Tempfile.new('openldap_module_path', '/tmp')
     begin
