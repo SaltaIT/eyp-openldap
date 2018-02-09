@@ -3,6 +3,8 @@
 ## 0.5.0
 
 * **MAJOR REWRITE**
+  - added **openldap_config** resource type
+  - added **openldap_module** resource type
 
 ## 0.4.13
 
