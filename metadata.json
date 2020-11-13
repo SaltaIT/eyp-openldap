@@ -1,7 +1,7 @@
 {
   "name": "eyp-openldap",
   "version": "0.5.0",
-  "author": "eyp",
+  "author": "Jordi Prats",
   "summary": "manages OpenLDAP using OLC",
   "license": "Apache-2.0",
   "source": "https://github.com/SaltaIT/eyp-openldap",
